@@ -1,5 +1,63 @@
 "use strict";
 
+class Activity {
+  date = new Date();
+  id = (Date.now() + "").slice(5);
+
+  constructor(coords, remarks, timein, timeout) {
+    this.coords = coords;
+    this.timein = timein;
+    this.timeout = timeout;
+    this.remarks = remarks;
+  }
+
+  timeSpent() {
+    this.timeSpent = this.timeout - this.timein;
+    return this.timeSpent;
+  }
+}
+
+class WalkingRunning extends Activity {
+  type = "walk/run";
+
+  constructor(coords, remarks, timein, timeout, timespent, steps) {
+    super(coords, remarks, timein, timeout, timespent);
+    this.steps = steps;
+    this.calcCadence;
+  }
+
+  calcCadence() {
+    //steps/min
+    this.cadence = this.steps / this.timeSpent();
+    return this.cadence;
+  }
+}
+
+class Playing extends Activity {
+  type = "playing";
+  constructor(coords, remarks, timein, timeout, timespent, playingActivity) {
+    super(coords, remarks, timein, timeout, timespent);
+    this.playingActivity = playingActivity;
+  }
+}
+
+class Bathroom extends Activity {
+  type = "bathroom";
+  constructor(coords, remarks, timein, timeout, timespent, bathroomActivity) {
+    super(coords, remarks, timein, timeout, timespent);
+    this.bathroomActivity = bathroomActivity;
+  }
+}
+
+class Resting extends Activity {
+  type = "resting";
+  constructor(coords, remarks, timein, timeout, timespent) {
+    super(coords, remarks, timein, timeout, timespent);
+  }
+}
+
+// === APPLICATION ARCHITECTURE ====
+
 // ***** FOR TWO LOCATIONS *****
 // const testBtn = document.querySelector(".btn__cl");
 // const testBtn2 = document.querySelector(".btn__rp");
