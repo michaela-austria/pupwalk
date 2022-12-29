@@ -154,7 +154,7 @@ const inputArray = [inputCadence, inputPlayingActivity, inputBathroomActivity]; 
 
 //   form.classList.add("form--hidden");
 // });
-console.log(test);
+
 class App {
   #map;
   #mapEvent;
