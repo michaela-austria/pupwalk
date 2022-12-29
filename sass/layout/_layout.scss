@@ -1,0 +1,38 @@
+.list-container {
+  width: 40rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 2rem;
+
+  @media only screen and (max-width: $bp-laptop-small) {
+    width: 30rem;
+  }
+
+  @media only screen and (max-width: $bp-tablet) {
+    width: auto;
+    height: 40rem;
+  }
+
+  background-color: $color-black;
+  color: $color-white;
+}
+
+.map-container {
+  flex: 1;
+}
+
+.container {
+  height: 100vh;
+  display: flex;
+  // padding: 1rem;
+
+  @media only screen and (max-width: $bp-tablet) {
+    flex-direction: column;
+  }
+
+  & > * {
+    padding: 2rem;
+  }
+}

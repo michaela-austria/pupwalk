@@ -1,0 +1,18 @@
+.btn{
+    border: none;
+    background-color: $color-orange-dark;
+    padding: 1rem;
+    display: block;
+    width: 100%;
+    color: $color-white;
+    font-family: inherit;
+    font-weight: $fw-bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all .2s;
+
+    &:hover{
+        background-color: $color-orange-light;
+        color: $color-black;
+    }
+}

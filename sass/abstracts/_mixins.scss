@@ -1,0 +1,5 @@
+@mixin list-components-css($background-color){
+    background-color: $background-color;
+    padding: 2rem;
+    border-radius: 5px;
+}

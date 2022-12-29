@@ -1,0 +1,52 @@
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: max-content;
+
+  &__logo {
+    width: 8rem;
+    height: 8rem;
+
+    img {
+      width: 100%;
+    }
+  }
+
+  &__name {
+    font-size: $fs-h3;
+    font-weight: $fw-bold;
+
+    span {
+      display: block;
+      font-size: $fs-caption;
+      font-weight: $fw-regular;
+    }
+  }
+}
+
+.tracker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  height: 77vh;
+  overflow-y: scroll;
+  width: 100%;
+
+  @media only screen and (max-width: $bp-tablet) {
+    flex-direction: row;
+  }
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.copyright {
+  font-size: $fs-caption;
+}
+
+.btn-container {
+  display: flex;
+  gap: 2rem;
+}

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>PupWalk | Dog Walk Tracker</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- LEAFLET API -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+
+    <script src="index.js" async defer></script>
+
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="list-container">
+        <div class="logo-container">
+          <div class="logo-container__logo">
+            <img src="img/pup-walk-logo.png" alt="pup-walk-logo" />
+          </div>
+          <div class="logo-container__name">PupWalk <span class="location-text">@ Richmond Park</span></div>
+        </div>
+
+        <div class="btn-container hidden">
+          <button class="btn btn__rp">Richmond Park</button>
+          <button class="btn btn__cl">Current Location</button>
+        </div>
+
+        <div class="tracker-list">
+          <form class="tracker-list__form form form--hidden">
+            <div class="form__row">
+              <label for="time-in" class="form__label">time in:</label>
+              <input type="time" id="time-in" name="time-in" class="form__input form__input--time" required />
+            </div>
+
+            <div class="form__row">
+              <label for="time-out" class="form__label">time out:</label>
+              <input type="time" id="time-out" name="time-in" class="form__input form__input--time" required />
+            </div>
+
+            <div class="form__row">
+              <label for="activity" class="form__label">activity:</label>
+              <select name="activity" id="activity" class="form__input form__input--dropdown" required>
+                <option class="select-option" value="activity">---</option>
+                <option class="select-option" value="walking">Walking</option>
+                <option class="select-option" value="running">Running</option>
+                <option class="select-option" value="playing">Playing</option>
+                <option class="select-option" value="bathroom">Bathroom</option>
+                <option class="select-option" value="resting">Resting</option>
+              </select>
+            </div>
+
+            <div class="form__row form__row--walkrun hidden">
+              <label for="time-out" class="form__label">cadence:</label>
+              <input type="number" class="form__input form__input--cadence" placeholder="step/min" />
+            </div>
+
+            <div class="form__row form__row--play hidden">
+              <label for="time-out" class="form__label">playing activity:</label>
+              <input type="text" class="form__input form__input--playing" placeholder="e.g. fetch" />
+            </div>
+
+            <div class="form__row form__row--bathroom hidden">
+              <label for="bathroomSelect" class="form__label">bathroom:</label>
+              <select name="bathroomSelect" id="bathroomSelect" class="form__input form__input--dropdown">
+                <option class="select-option" value="popping">💩 Pooping</option>
+                <option class="select-option" value="peeing">💦 Peeing</option>
+              </select>
+            </div>
+
+            <div class="form__row form__row--remarks hidden">
+              <label for="remarks" class="form__label">Remarks:</label>
+              <textarea name="remarks" id="remarks" cols="20" rows="3" class="form__input form__input--textarea"></textarea>
+            </div>
+
+            <button class="form__btn btn hidden">Save</button>
+          </form>
+
+          <div class="tracket-list__tracker tracker">
+            <h2 class="tracker__header">{Activity} for {TimeSpent}</h2>
+            <div class="tracker__details">
+              <span class="tracker__details--icon">🗓</span>
+              <span class="tracker__details--value">{Date}</span>
+            </div>
+            <div class="tracker__details">
+              <span class="tracker__details--icon">⏳</span>
+              <span class="tracker__details--value">{Time in}</span>
+            </div>
+            <div class="tracker__details">
+              <span class="tracker__details--icon">⌛️</span>
+              <span class="tracker__details--value">{Time out}</span>
+            </div>
+            <div class="tracker__details tracker__details--remarks">
+              <span class="tracker__details--icon">✍🏻</span>
+              <span class="tracker__details--value">{Remarks}</span>
+            </div>
+          </div>
+          <div class="tracket-list__tracker tracker">
+            <h2 class="tracker__header">{Activity} for {TimeSpent}</h2>
+            <div class="tracker__details">
+              <span class="tracker__details--icon">🗓</span>
+              <span class="tracker__details--value">{Date}</span>
+            </div>
+            <div class="tracker__details">
+              <span class="tracker__details--icon">⏳</span>
+              <span class="tracker__details--value">{Time in}</span>
+            </div>
+            <div class="tracker__details">
+              <span class="tracker__details--icon">⌛️</span>
+              <span class="tracker__details--value">{Time out}</span>
+            </div>
+            <div class="tracker__details tracker__details--remarks">
+              <span class="tracker__details--icon">✍🏻</span>
+              <span class="tracker__details--value">{Remarks}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="copyright">created by michaelaangelaaustria@gmail.com &copy; year</div>
+      </div>
+      <div class="map-container" id="map"></div>
+    </div>
+  </body>
+</html>
