@@ -4,55 +4,58 @@ class Activity {
   date = new Date();
   id = (Date.now() + "").slice(5);
 
-  constructor(coords, remarks, timein, timeout) {
+  constructor(coords, remarks, timein, timeout, activity) {
     this.coords = coords;
     this.timein = timein;
     this.timeout = timeout;
     this.remarks = remarks;
+    this.timespent = this.timeSpent();
+    this.activity = activity;
   }
 
   timeSpent() {
-    this.timeSpent = this.timeout - this.timein;
-    return this.timeSpent;
+    const [timeinHour, timeinMinutes] = this.timein.split(":");
+    const [timeoutHour, timeoutMinutes] = this.timeout.split(":");
+    const startTime = new Date(0, 0, 0, timeinHour, timeinMinutes);
+    const endTime = new Date(0, 0, 0, timeoutHour, timeoutMinutes);
+    const diff = endTime.getTime() - startTime.getTime();
+    const SEC = 1000,
+      MIN = 60 * SEC,
+      HRS = 60 * MIN;
+    const forCadence = Math.abs(Math.floor((diff / HRS) * 60));
+
+    return { hour: Math.abs(Math.floor(diff / HRS)), mins: Math.abs(Math.floor((diff % HRS) / MIN)), inMinutes: forCadence };
   }
 }
 
 class WalkingRunning extends Activity {
-  type = "walk/run";
-
-  constructor(coords, remarks, timein, timeout, timespent, steps) {
+  constructor(coords, remarks, timein, timeout, steps, timespent) {
     super(coords, remarks, timein, timeout, timespent);
     this.steps = steps;
-    this.calcCadence;
+
+    this.cadence = this.calcCadence();
   }
 
   calcCadence() {
     //steps/min
-    this.cadence = this.steps / this.timeSpent();
-    return this.cadence;
+    let result = this.steps / this.timespent.inMinutes;
+    return result;
   }
 }
 
 class Playing extends Activity {
-  type = "playing";
-  constructor(coords, remarks, timein, timeout, timespent, playingActivity) {
-    super(coords, remarks, timein, timeout, timespent);
+  activity = "playing";
+  constructor(coords, remarks, timein, timeout, playingActivity, activity) {
+    super(coords, remarks, timein, timeout, activity);
     this.playingActivity = playingActivity;
   }
 }
 
 class Bathroom extends Activity {
-  type = "bathroom";
-  constructor(coords, remarks, timein, timeout, timespent, bathroomActivity) {
-    super(coords, remarks, timein, timeout, timespent);
+  activity = "bathroom";
+  constructor(coords, remarks, timein, timeout, bathroomActivity, activity) {
+    super(coords, remarks, timein, timeout, activity);
     this.bathroomActivity = bathroomActivity;
-  }
-}
-
-class Resting extends Activity {
-  type = "resting";
-  constructor(coords, remarks, timein, timeout, timespent) {
-    super(coords, remarks, timein, timeout, timespent);
   }
 }
 
@@ -216,6 +219,7 @@ const inputArray = [inputCadence, inputPlayingActivity, inputBathroomActivity]; 
 class App {
   #map;
   #mapEvent;
+  #activityEntries = [];
 
   constructor() {
     this._loadMap();
@@ -288,9 +292,48 @@ class App {
     console.log("newActivityCalled");
     e.preventDefault();
 
+    const [inputTimeIn, inputTimeOut, inputActivity, inputSteps, inputPlaying, inputBathroom, inputRemarks] = allFormInput;
+    const timein = inputTimeIn.value;
+    const timeout = inputTimeOut.value;
+    const activity = inputActivity.value;
+    const remarks = inputRemarks.value;
+    const { lat, lng } = this.#mapEvent.latlng;
+    let activityEntry;
+
+    if (activity === "walking") {
+      const steps = +inputSteps.value;
+      if (!(steps >= 0)) return alert("Input must be positive number");
+      activityEntry = new WalkingRunning([lat, lng], remarks, timein, timeout, steps, activity);
+    }
+
+    if (activity === "running") {
+      const steps = +inputSteps.value;
+      if (!(steps >= 0)) return alert("Input must be positive number");
+      activityEntry = new WalkingRunning([lat, lng], remarks, timein, timeout, steps, activity);
+    }
+
+    if (activity === "playing") {
+      const playingActivityValue = inputPlaying.value;
+      activityEntry = new Playing([lat, lng], remarks, timein, timeout, playingActivityValue, activity);
+    }
+
+    if (activity === "bathroom") {
+      const bathroomActivityValue = inputBathroom.value;
+      activityEntry = new Bathroom([lat, lng], remarks, timein, timeout, bathroomActivityValue, activity);
+    }
+
+    if (activity === "resting") {
+      activityEntry = new Activity([lat, lng], remarks, timein, timeout, activity);
+    }
+
+    this.#activityEntries.push(activityEntry);
+
     allFormInput.forEach((i) => (i.value = ""));
 
-    const { lat, lng } = this.#mapEvent.latlng;
+    this._renderActivityMarker(lat, lng);
+  }
+
+  _renderActivityMarker(lat, lng) {
     L.marker([lat, lng])
       .addTo(this.#map)
       .bindPopup(L.popup({ autoClose: false, closeOnClick: false, className: "new-activity" }))
