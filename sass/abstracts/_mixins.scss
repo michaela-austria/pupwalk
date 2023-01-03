@@ -1,5 +1,59 @@
-@mixin list-components-css($background-color){
-    background-color: $background-color;
-    padding: 2rem;
-    border-radius: 5px;
+%activityEmojiPlacement {
+  display: block;
+  position: absolute;
+  font-size: 2.8rem;
+  top: 1rem;
+  left: 1rem;
+}
+
+@mixin list-components-css($background-color) {
+  background-color: $background-color;
+  padding: 2rem 2rem 2rem 1.5rem;
+  border-radius: 5px;
+  position: relative;
+
+  &--walking {
+    border: 0.5rem solid $color-orange-dark;
+
+    &::before {
+      content: "🚶";
+      @extend %activityEmojiPlacement;
+    }
+  }
+
+  &--running {
+    border: 0.5rem solid $color-blue;
+
+    &::before {
+      content: "🏃";
+      @extend %activityEmojiPlacement;
+    }
+  }
+
+  &--playing {
+    border: 0.5rem solid $color-green-light;
+
+    &::before {
+      content: "🕹";
+      @extend %activityEmojiPlacement;
+    }
+  }
+
+  &--bathroom {
+    border: 0.5rem solid $color-orange-light;
+
+    &::before {
+      content: "🚽";
+      @extend %activityEmojiPlacement;
+    }
+  }
+
+  &--resting {
+    border: 0.5rem solid $color-white;
+
+    &::before {
+      content: "💤";
+      @extend %activityEmojiPlacement;
+    }
+  }
 }

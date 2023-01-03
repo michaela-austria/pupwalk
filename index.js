@@ -1,21 +1,21 @@
 "use strict";
 
 class Activity {
-  date = new Date();
   id = (Date.now() + "").slice(5);
 
   constructor(coords, remarks, timein, timeout, activity) {
     this.coords = coords;
-    this.timein = timein;
-    this.timeout = timeout;
+    this.timein = { timein: timein, timeInDesc: this._setTimeInTimeOutIn12Hrs(timein) };
+    this.timeout = { timeout: timeout, timeOutInDesc: this._setTimeInTimeOutIn12Hrs(timeout) };
     this.remarks = remarks;
-    this.timespent = this.timeSpent();
+    this.timespent = this._timeSpent();
     this.activity = activity;
+    this.date = this._setDate();
   }
 
-  timeSpent() {
-    const [timeinHour, timeinMinutes] = this.timein.split(":");
-    const [timeoutHour, timeoutMinutes] = this.timeout.split(":");
+  _timeSpent() {
+    const [timeinHour, timeinMinutes] = this.timein.timein.split(":");
+    const [timeoutHour, timeoutMinutes] = this.timeout.timeout.split(":");
     const startTime = new Date(0, 0, 0, timeinHour, timeinMinutes);
     const endTime = new Date(0, 0, 0, timeoutHour, timeoutMinutes);
     const diff = endTime.getTime() - startTime.getTime();
@@ -25,6 +25,30 @@ class Activity {
     const forCadence = Math.abs(Math.floor((diff / HRS) * 60));
 
     return { hour: Math.abs(Math.floor(diff / HRS)), mins: Math.abs(Math.floor((diff % HRS) / MIN)), inMinutes: forCadence };
+  }
+
+  _setDate() {
+    const date = new Date();
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  }
+
+  _setTimeInTimeOutIn12Hrs(time) {
+    const timeSplit = time.split(":");
+    let hours, minutes, meridian;
+    hours = timeSplit[0];
+    minutes = timeSplit[1];
+    if (hours > 12) {
+      meridian = "PM";
+      hours -= 12;
+    } else if (hours < 12) {
+      meridian = "AM";
+      if (hours === 0) hours = 12;
+    } else {
+      meridian = "PM";
+    }
+
+    return `${hours}:${minutes} ${meridian}`;
   }
 }
 
@@ -128,6 +152,7 @@ const inputRemarks = document.querySelector(".form__row--remarks");
 const btnFormSave = document.querySelector(".form__btn");
 const allFormInput = document.querySelectorAll(".form__input");
 const inputArray = [inputCadence, inputPlayingActivity, inputBathroomActivity]; //for hidding stuff on activity dropdown
+const trackerActivtiyContainer = document.querySelector(".tracker-list");
 
 // let map, mapEvent;
 
@@ -219,12 +244,14 @@ const inputArray = [inputCadence, inputPlayingActivity, inputBathroomActivity]; 
 class App {
   #map;
   #mapEvent;
-  #activityEntries = [];
+  #mapZoomLevel = 18;
+  activityEntries = [];
 
   constructor() {
     this._loadMap();
     inputActivityDropdown.addEventListener("change", this._toggleActivity);
     form.addEventListener("submit", this._newActivity.bind(this));
+    trackerActivtiyContainer.addEventListener("click", this._moveToMarker.bind(this));
   }
 
   _loadMap() {
@@ -232,7 +259,7 @@ class App {
     this.#map = L.map("map").setView(coords, 15);
 
     L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
-      maxZoom: 20,
+      maxZoom: this.#mapZoomLevel,
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles style by <a href="https://www.hotosm.org/" target="_blank">Humanitarian OpenStreetMap Team</a> hosted by <a href="https://openstreetmap.fr/" target="_blank">OpenStreetMap France</a>',
     }).addTo(this.#map);
@@ -293,31 +320,44 @@ class App {
     e.preventDefault();
 
     const [inputTimeIn, inputTimeOut, inputActivity, inputSteps, inputPlaying, inputBathroom, inputRemarks] = allFormInput;
+    // if (+inputTimeIn.value.split(":")[0] > +inputTimeOut.value.split(":")[0] || +inputTimeIn.value.split(":")[1] > +inputTimeOut.value.split(":")[1])
+    //   return alert("time out is earlier than time in", inputTimeIn.value.split(":")[0]);
+
+    if (inputTimeIn.value === inputTimeOut.value) return alert("make sure time in and time out are not the same");
+
     const timein = inputTimeIn.value;
     const timeout = inputTimeOut.value;
     const activity = inputActivity.value;
-    const remarks = inputRemarks.value;
     const { lat, lng } = this.#mapEvent.latlng;
     let activityEntry;
 
+    let remarks;
+    if (inputRemarks.value === "") {
+      remarks = null;
+    } else remarks = inputRemarks.value;
+
     if (activity === "walking") {
+      if (inputSteps.value === "") return alert("Fill in Steps Field");
       const steps = +inputSteps.value;
       if (!(steps >= 0)) return alert("Input must be positive number");
       activityEntry = new WalkingRunning([lat, lng], remarks, timein, timeout, steps, activity);
     }
 
     if (activity === "running") {
+      if (inputSteps.value === "") return alert("Fill in Steps Field");
       const steps = +inputSteps.value;
       if (!(steps >= 0)) return alert("Input must be positive number");
       activityEntry = new WalkingRunning([lat, lng], remarks, timein, timeout, steps, activity);
     }
 
     if (activity === "playing") {
+      if (inputPlaying.value === "") return alert("Fill in Playing Field");
       const playingActivityValue = inputPlaying.value;
       activityEntry = new Playing([lat, lng], remarks, timein, timeout, playingActivityValue, activity);
     }
 
     if (activity === "bathroom") {
+      if (inputBathroom.value === "") return alert("Fill in Bathroom Field");
       const bathroomActivityValue = inputBathroom.value;
       activityEntry = new Bathroom([lat, lng], remarks, timein, timeout, bathroomActivityValue, activity);
     }
@@ -326,11 +366,10 @@ class App {
       activityEntry = new Activity([lat, lng], remarks, timein, timeout, activity);
     }
 
-    this.#activityEntries.push(activityEntry);
-
-    allFormInput.forEach((i) => (i.value = ""));
-
-    this._renderActivityMarker(lat, lng);
+    this.activityEntries.push(activityEntry); //adding new object to the array
+    this._renderActivityMarker(lat, lng); //adding the marker to the map
+    allFormInput.forEach((i) => (i.value = "")); //clearing the input values
+    this._renderActivity(activityEntry);
   }
 
   _renderActivityMarker(lat, lng) {
@@ -343,6 +382,86 @@ class App {
     form.classList.add("form--hidden");
     const toHide = [inputRemarks, ...inputArray, btnFormSave];
     toHide.forEach((i) => i.classList.add("hidden"));
+  }
+
+  _renderActivity(activityEntry) {
+    let html = `
+      <div class="tracket-list__tracker tracker tracker--${activityEntry.activity}" data-id="${activityEntry.id}">
+
+      <h2 class="tracker__header"> ${activityEntry.activity[0].toUpperCase() + activityEntry.activity.slice(1, -1) + activityEntry.activity.slice(-1)} for ${
+      activityEntry.timespent.hour > 0 ? `${activityEntry.timespent.hour > 1 ? `${activityEntry.timespent.hour}hrs` : `${activityEntry.timespent.hour}hr`}` : ""
+    } ${activityEntry.timespent.mins > 0 ? `${activityEntry.timespent.mins > 1 ? `${activityEntry.timespent.mins}mins` : `${activityEntry.timespent.mins}min`}` : ""}</h2>
+
+        <div class="tracker__details">
+          <span class="tracker__details--icon">🗓</span>
+          <span class="tracker__details--value">${activityEntry.date}</span>
+        </div>
+        <div class="tracker__details">
+          <span class="tracker__details--icon">⏳</span>
+          <span class="tracker__details--value">${activityEntry.timein.timeInDesc}</span>
+        </div>
+        <div class="tracker__details">
+          <span class="tracker__details--icon">⌛️</span>
+          <span class="tracker__details--value">${activityEntry.timeout.timeOutInDesc}</span>
+        </div>
+        
+        ${
+          activityEntry.remarks === null
+            ? ""
+            : `
+          <div class="tracker__details tracker__details--remarks">
+            <span class="tracker__details--icon">✍🏻</span>
+            <span class="tracker__details--value">${activityEntry.remarks}</span>
+          </div>
+        `
+        }
+    `;
+
+    if (activityEntry.activity === "walking" || activityEntry.activity === "running") {
+      html += `
+            <div class="tracker__details tracker__details--steps">
+              <span class="tracker__details--icon">🐾</span>
+              <span class="tracker__details--value">${activityEntry.steps} steps</span>
+            </div>
+            <div class="tracker__details tracker__details--cadence">
+              <span class="tracker__details--icon">⚡️</span>
+              <span class="tracker__details--value">${activityEntry.cadence.toFixed(2)} spm</span>
+            </div>
+        </div>
+      `;
+    }
+
+    if (activityEntry.activity === "playing") {
+      html += `
+            <div class="tracker__details tracker__details--playingActivity">
+              <span class="tracker__details--icon">🦴</span>
+              <span class="tracker__details--value">${activityEntry.playingActivity}</span>
+            </div>
+        </div>
+      `;
+    }
+
+    if (activityEntry.activity === "bathroom") {
+      html += `
+            <div class="tracker__details tracker__details--bathroomActivity">
+              <span class="tracker__details--icon">${activityEntry.bathroomActivity.slice(-2)}</span>
+              <span class="tracker__details--value">${activityEntry.bathroomActivity[0].toUpperCase() + activityEntry.bathroomActivity.slice(1, -2)}</span>
+            </div>
+        </div>
+      `;
+    }
+
+    form.insertAdjacentHTML("afterend", html);
+  }
+
+  _moveToMarker(e) {
+    const activityListElement = e.target.closest(".tracket-list__tracker ");
+    if (!activityListElement) return;
+
+    const activityData = this.activityEntries.find((entry) => entry.id === activityListElement.dataset.id);
+    console.log(activityData);
+
+    this.#map.setView(activityData.coords, this.#mapZoomLevel, { animate: true, duration: 1, easeLinearity: 0.5 });
   }
 }
 
