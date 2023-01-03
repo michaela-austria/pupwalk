@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>PupWalk | Dog Walk Tracker</title>
+    <link rel="icon" type="image/x-icon" href="img/pup-walk-logo.png" />
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
@@ -81,9 +82,60 @@
           </form>
         </div>
 
-        <div class="copyright">created by michaelaangelaaustria@gmail.com &copy; year</div>
+        <div class="copyright">created by michaelaangelaaustria@gmail.com &copy; <span class="dynamicYear">year</span></div>
       </div>
       <div class="map-container" id="map"></div>
+    </div>
+
+    <div class="form-modal hidden">
+      <form class="tracker-list__form form form--hidden">
+        <div class="form__row">
+          <label for="time-in" class="form__label">time in:</label>
+          <input type="time" id="time-in" name="time-in" class="form__input form__input--time" required />
+        </div>
+
+        <div class="form__row">
+          <label for="time-out" class="form__label">time out:</label>
+          <input type="time" id="time-out" name="time-in" class="form__input form__input--time" required />
+        </div>
+
+        <div class="form__row">
+          <label for="activity" class="form__label">activity:</label>
+          <select name="activity" id="activity" class="form__input form__input--dropdown" required>
+            <option class="select-option" value="activity">---</option>
+            <option class="select-option" value="walking">Walking</option>
+            <option class="select-option" value="running">Running</option>
+            <option class="select-option" value="playing">Playing</option>
+            <option class="select-option" value="bathroom">Bathroom</option>
+            <option class="select-option" value="resting">Resting</option>
+          </select>
+        </div>
+
+        <div class="form__row form__row--walkrun hidden">
+          <label for="time-out" class="form__label">Steps:</label>
+          <input type="number" class="form__input form__input--steps" placeholder="steps" />
+        </div>
+
+        <div class="form__row form__row--play hidden">
+          <label for="time-out" class="form__label">playing activity:</label>
+          <input type="text" class="form__input form__input--playing" placeholder="e.g. fetch" />
+        </div>
+
+        <div class="form__row form__row--bathroom hidden">
+          <label for="bathroomSelect" class="form__label">bathroom:</label>
+          <select name="bathroomSelect" id="bathroomSelect" class="form__input form__input--dropdown">
+            <option class="select-option" value="popping 💩">💩 Pooping</option>
+            <option class="select-option" value="peeing 💦">💦 Peeing</option>
+          </select>
+        </div>
+
+        <div class="form__row form__row--remarks hidden">
+          <label for="remarks" class="form__label">Remarks:</label>
+          <textarea name="remarks" id="remarks" cols="20" rows="3" class="form__input form__input--textarea"></textarea>
+        </div>
+
+        <button class="form__btn btn hidden">Save</button>
+      </form>
     </div>
   </body>
 </html>

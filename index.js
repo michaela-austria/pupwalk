@@ -1,5 +1,9 @@
 "use strict";
 
+const dynamicYear = document.querySelector(".dynamicYear");
+const currYear = new Date();
+dynamicYear.textContent = currYear.getFullYear();
+
 class Activity {
   id = (Date.now() + "").slice(5);
 
@@ -235,8 +239,9 @@ class App {
     e.preventDefault();
 
     const [inputTimeIn, inputTimeOut, inputActivity, inputSteps, inputPlaying, inputBathroom, inputRemarks] = allFormInput;
-    if (+inputTimeIn.value.split(":")[0] > +inputTimeOut.value.split(":")[0] || +inputTimeIn.value.split(":")[1] > +inputTimeOut.value.split(":")[1])
-      return alert("time out is earlier than time in", inputTimeIn.value.split(":")[0]);
+
+    if (+inputTimeIn.value.split(":")[0] > +inputTimeOut.value.split(":")[0]) return alert("time out is earlier than time in (HOUR)"); //checking by HOUR
+    if (+inputTimeIn.value.split(":")[1] > +inputTimeOut.value.split(":")[1]) return alert("time out is earlier than time in (MINS)"); //checking by MINS
 
     if (inputTimeIn.value === inputTimeOut.value) return alert("make sure time in and time out are not the same");
 
@@ -289,10 +294,22 @@ class App {
   }
 
   _renderActivityMarker(activity) {
-    L.marker(activity.coords)
+    var locationIcon = L.icon({
+      iconUrl: "img/custom-icon.png",
+
+      iconSize: [50, 65], // size of the icon
+      iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
+      popupAnchor: [-4, -85], // point
+    });
+
+    L.marker(activity.coords, { icon: locationIcon })
       .addTo(this.#map)
-      .bindPopup(L.popup({ autoClose: false, closeOnClick: false, className: "new-activity" }))
-      .setPopupContent("New Activity")
+      .bindPopup(L.popup({ autoClose: false, closeOnClick: false, className: `${activity.activity}--popup` }))
+      .setPopupContent(
+        `${activity.activity[0].toUpperCase() + activity.activity.slice(1, -1) + activity.activity.slice(-1)} for ${
+          activity.timespent.hour > 0 ? `${activity.timespent.hour > 1 ? `${activity.timespent.hour}hrs` : `${activity.timespent.hour}hr`}` : ""
+        } ${activity.timespent.mins > 0 ? `${activity.timespent.mins > 1 ? `${activity.timespent.mins}mins` : `${activity.timespent.mins}min`}` : ""}`
+      )
       .openPopup();
 
     form.classList.add("form--hidden");

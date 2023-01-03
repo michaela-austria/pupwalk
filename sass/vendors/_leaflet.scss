@@ -1,9 +1,39 @@
-// .leaflet-popup-content-wrapper {
-//   background-color: $color-black;
-//   color: $color-white;
-// }
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background-color: $color-white;
+  color: $color-black;
+}
 
 .leaflet-popup-content {
   font-family: "Hanken Grotesk", sans-serif;
   font-size: $fs-caption;
+
+  @media only screen and (max-width: $bp-tablet) {
+    font-size: $fs-base;
+    margin: 13px;
+  }
+}
+
+.walking--popup .leaflet-popup-content-wrapper {
+  border-left: 1rem solid $color-orange-dark;
+}
+
+.running--popup .leaflet-popup-content-wrapper {
+  border-left: 1rem solid $color-blue;
+}
+
+.playing--popup .leaflet-popup-content-wrapper {
+  border-left: 1rem solid $color-green-light;
+}
+
+.bathroom--popup .leaflet-popup-content-wrapper {
+  border-left: 1rem solid $color-orange-light;
+}
+
+.resting--popup .leaflet-popup-content-wrapper {
+  border-left: 1rem solid $color-black;
+}
+
+.leaflet-popup-content {
+  width: max-content !important;
 }

@@ -5,6 +5,10 @@
   grid-template-rows: repeat(3, min-content);
   gap: 1rem;
 
+  @media only screen and (max-width: $bp-tablet) {
+    height: max-content;
+  }
+
   &__header {
     font-size: $fs-h6;
     margin-left: 3rem;
@@ -25,6 +29,10 @@
     &--remarks {
       grid-row: 4/5;
       grid-column: 1/-1;
+    }
+
+    &--cadence {
+      grid-column: 2/-1;
     }
   }
 }

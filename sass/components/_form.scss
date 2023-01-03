@@ -2,8 +2,19 @@
   @include list-components-css($color-brown-dark);
   transition: all 0.5s, transform 1ms;
 
+  @media only screen and (max-width: $bp-tablet) {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    // grid-template-columns: repeat(auto-fit, minmax(26.7px, 400px));
+    column-gap: 2rem;
+  }
+
   & > *:not(:last-child) {
     margin-bottom: 8px;
+
+    @media only screen and (max-width: $bp-tablet) {
+      margin-bottom: 0px;
+    }
   }
 
   &__row {
@@ -27,6 +38,7 @@
     padding: 4px 4px;
     border-radius: 5px;
     border: none;
+    width: 100%;
 
     &:is(:focus) {
       outline-color: $color-orange-dark;
@@ -47,5 +59,9 @@
     padding: 0 2.25rem;
     margin-bottom: 0;
     opacity: 0;
+
+    // @media only screen and (max-width: $bp-tablet) {
+    //   display: none;
+    // }
   }
 }
