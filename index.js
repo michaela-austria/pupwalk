@@ -154,100 +154,14 @@ const allFormInput = document.querySelectorAll(".form__input");
 const inputArray = [inputCadence, inputPlayingActivity, inputBathroomActivity]; //for hidding stuff on activity dropdown
 const trackerActivtiyContainer = document.querySelector(".tracker-list");
 
-// let map, mapEvent;
-
-// // navigator.geolocation.getCurrentPosition(
-// //   //success funciton
-// //   function (position) {
-// // const { latitude, longitude } = position.coords;
-// const coords = [51.4412081, -0.2766986];
-// map = L.map("map").setView(coords, 15);
-
-// L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
-//   maxZoom: 20,
-//   attribution:
-//     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles style by <a href="https://www.hotosm.org/" target="_blank">Humanitarian OpenStreetMap Team</a> hosted by <a href="https://openstreetmap.fr/" target="_blank">OpenStreetMap France</a>',
-// }).addTo(map);
-
-// // === WELCOME SIGN ===
-// // L.marker(coords).addTo(map).bindPopup("Welcome to <strong>Richmond Park</strong>").openPopup();
-
-// map.on("click", function (mapE) {
-//   mapEvent = mapE;
-//   form.classList.toggle("form--hidden");
-//   form.classList.toggle("form--transition");
-//   inputActivityDropdown.focus();
-// });
-// //   },
-// //   //   error function
-// //   () => {
-// //     alert("Having trouble getting your location");
-// //   }
-// // );
-
-// const changeFormActivity = function (selectedActivity) {
-//   const inputArray = [inputCadence, inputPlayingActivity, inputBathroomActivity];
-
-//   const unhideInput = function (input) {
-//     if (input == "resting" || input == "activity") {
-//       inputArray.forEach((i) => i.classList.add("hidden"));
-//     }
-
-//     inputArray.filter((i) => {
-//       if (i !== input) {
-//         i.classList.add("hidden");
-//       } else {
-//         return i.classList.remove("hidden");
-//       }
-//     });
-//   };
-
-//   if (selectedActivity == "running" || selectedActivity == "walking") {
-//     unhideInput(inputCadence);
-//   } else if (selectedActivity == "playing") {
-//     unhideInput(inputPlayingActivity);
-//   } else if (selectedActivity == "bathroom") {
-//     unhideInput(inputBathroomActivity);
-//   } else if (selectedActivity == "resting") {
-//     unhideInput("resting");
-//   } else if (selectedActivity == "activity") {
-//     unhideInput("activity");
-//     btnFormSave.classList.add("hidden");
-//   }
-
-//   selectedActivity == "activity" ? inputRemarks.classList.add("hidden") : inputRemarks.classList.remove("hidden");
-// };
-
-// inputActivityDropdown.addEventListener("change", function () {
-//   const selectedIndex = inputActivityDropdown.selectedIndex;
-//   const selectedActivity = allActivityOptions[selectedIndex].value;
-
-//   changeFormActivity(selectedActivity);
-//   btnFormSave.classList.remove("hidden");
-// });
-
-// form.addEventListener("submit", function (e) {
-//   e.preventDefault();
-
-//   allFormInput.forEach((i) => (i.value = ""));
-
-//   const { lat, lng } = mapEvent.latlng;
-//   L.marker([lat, lng])
-//     .addTo(map)
-//     .bindPopup(L.popup({ autoClose: false, closeOnClick: false, className: "new-activity" }))
-//     .setPopupContent("New Activity")
-//     .openPopup();
-
-//   form.classList.add("form--hidden");
-// });
-
 class App {
   #map;
   #mapEvent;
   #mapZoomLevel = 18;
-  activityEntries = [];
+  #activityEntries = [];
 
   constructor() {
+    this._getLocalStorage();
     this._loadMap();
     inputActivityDropdown.addEventListener("change", this._toggleActivity);
     form.addEventListener("submit", this._newActivity.bind(this));
@@ -268,6 +182,8 @@ class App {
     // L.marker(coords).addTo(map).bindPopup("Welcome to <strong>Richmond Park</strong>").openPopup();
 
     this.#map.on("click", this._showForm.bind(this));
+
+    this.#activityEntries.forEach((activtiyData) => this._renderActivityMarker(activtiyData));
   }
 
   _showForm(mapE) {
@@ -316,12 +232,11 @@ class App {
   }
 
   _newActivity(e) {
-    console.log("newActivityCalled");
     e.preventDefault();
 
     const [inputTimeIn, inputTimeOut, inputActivity, inputSteps, inputPlaying, inputBathroom, inputRemarks] = allFormInput;
-    // if (+inputTimeIn.value.split(":")[0] > +inputTimeOut.value.split(":")[0] || +inputTimeIn.value.split(":")[1] > +inputTimeOut.value.split(":")[1])
-    //   return alert("time out is earlier than time in", inputTimeIn.value.split(":")[0]);
+    if (+inputTimeIn.value.split(":")[0] > +inputTimeOut.value.split(":")[0] || +inputTimeIn.value.split(":")[1] > +inputTimeOut.value.split(":")[1])
+      return alert("time out is earlier than time in", inputTimeIn.value.split(":")[0]);
 
     if (inputTimeIn.value === inputTimeOut.value) return alert("make sure time in and time out are not the same");
 
@@ -366,14 +281,15 @@ class App {
       activityEntry = new Activity([lat, lng], remarks, timein, timeout, activity);
     }
 
-    this.activityEntries.push(activityEntry); //adding new object to the array
-    this._renderActivityMarker(lat, lng); //adding the marker to the map
+    this.#activityEntries.push(activityEntry); //adding new object to the array
+    this._renderActivityMarker(activityEntry); //adding the marker to the map
     allFormInput.forEach((i) => (i.value = "")); //clearing the input values
-    this._renderActivity(activityEntry);
+    this._renderActivity(activityEntry); //render to sidebar list
+    this._setLocalStorage(); //save to local storage
   }
 
-  _renderActivityMarker(lat, lng) {
-    L.marker([lat, lng])
+  _renderActivityMarker(activity) {
+    L.marker(activity.coords)
       .addTo(this.#map)
       .bindPopup(L.popup({ autoClose: false, closeOnClick: false, className: "new-activity" }))
       .setPopupContent("New Activity")
@@ -458,10 +374,27 @@ class App {
     const activityListElement = e.target.closest(".tracket-list__tracker ");
     if (!activityListElement) return;
 
-    const activityData = this.activityEntries.find((entry) => entry.id === activityListElement.dataset.id);
-    console.log(activityData);
+    const activityData = this.#activityEntries.find((entry) => entry.id === activityListElement.dataset.id);
 
     this.#map.setView(activityData.coords, this.#mapZoomLevel, { animate: true, duration: 1, easeLinearity: 0.5 });
+  }
+
+  _setLocalStorage() {
+    localStorage.setItem("activity", JSON.stringify(this.#activityEntries));
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem("activity"));
+
+    if (!data) return;
+
+    this.#activityEntries = data;
+    this.#activityEntries.forEach((activityData) => this._renderActivity(activityData));
+  }
+
+  reset() {
+    localStorage.removeItem("activity");
+    location.reload();
   }
 }
 
