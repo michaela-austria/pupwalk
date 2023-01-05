@@ -89,62 +89,8 @@ class Bathroom extends Activity {
 
 // === APPLICATION ARCHITECTURE ====
 
-// ***** FOR TWO LOCATIONS *****
-// const testBtn = document.querySelector(".btn__cl");
-// const testBtn2 = document.querySelector(".btn__rp");
-// const container = document.querySelector(".container");
-
-// const removeAndCreateMap = function () {
-//   map.remove();
-
-//   const newMap = document.createElement("div");
-//   newMap.setAttribute("id", "map");
-//   newMap.setAttribute("class", "map-container");
-//   container.insertAdjacentElement("beforeend", newMap);
-// };
-
-// const loadMap = function (latitute, longitude) {
-//   //   const coords = [51.4412081, -0.2766986];
-//   const coords = [latitute, longitude];
-
-//   const map = L.map("map").setView(coords, 16);
-
-//   L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
-//     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-//   }).addTo(map);
-// };
-
-// loadMap(51.4412081, -0.2766986); //Richmond Park muna
-
-// testBtn2.addEventListener("click", function () {
-//   removeAndCreateMap();
-//   loadMap(51.4412081, -0.2766986);
-// });
-
-// testBtn.addEventListener("click", function () {
-//   //   map.remove();
-
-//   //   const newMap = document.createElement("div");
-//   //   newMap.setAttribute("id", "map");
-//   //   newMap.setAttribute("class", "map-container");
-//   //   container.insertAdjacentElement("beforeend", newMap);
-
-//   removeAndCreateMap();
-
-//   navigator.geolocation.getCurrentPosition(
-//     // success function
-//     function (position) {
-//       //   console.log(position);
-//       const { latitude, longitude } = position.coords;
-//       console.log(latitude, longitude);
-//       loadMap(latitude, longitude);
-//     },
-//     // error function
-//     () => {
-//       alert("Having trouble getting your location");
-//     }
-//   );
-// });
+let mapContainer = document.getElementById("map");
+let container = document.querySelector(".container");
 
 const form = document.querySelector("form");
 const inputActivityDropdown = document.querySelector(".form__input--dropdown");
@@ -158,22 +104,57 @@ const allFormInput = document.querySelectorAll(".form__input");
 const inputArray = [inputCadence, inputPlayingActivity, inputBathroomActivity]; //for hidding stuff on activity dropdown
 const trackerActivtiyContainer = document.querySelector(".tracker-list");
 
+const btnReset = document.querySelector(".btn__reset");
+const btnChangeLoc = document.querySelector(".btn__change");
+const textLocation = document.querySelector(".location-text");
+
 class App {
   #map;
   #mapEvent;
   #mapZoomLevel = 18;
   #activityEntries = [];
+  #coordsPark = {
+    coords: {
+      latitude: 51.4412081,
+      longitude: -0.2766986,
+    },
+  };
 
   constructor() {
     this._getLocalStorage();
-    this._loadMap();
+    swal({ title: "Welcome to PupWalk!", text: "Choose location for your map", buttons: ["Your Location", "Richmond Park"], icon: "warning" }).then((value) => {
+      if (value) {
+        this._loadMap(this.#coordsPark);
+        textLocation.textContent = "@ Richmond Park";
+        btnChangeLoc.classList.remove("hidden");
+        btnReset.classList.remove("hidden");
+      } else {
+        this._loadCurrentLoc();
+        textLocation.textContent = "@ Your Location";
+        btnChangeLoc.classList.remove("hidden");
+        btnReset.classList.remove("hidden");
+      }
+    });
     inputActivityDropdown.addEventListener("change", this._toggleActivity);
     form.addEventListener("submit", this._newActivity.bind(this));
     trackerActivtiyContainer.addEventListener("click", this._moveToMarker.bind(this));
+
+    btnReset.addEventListener("click", () => {
+      return this.#activityEntries.length === 0 ? alert("No Entries") : this.reset();
+    });
+    btnChangeLoc.addEventListener("click", () => {
+      swal({ title: "Are you sure you want to change your map?", text: "By confirming, your list will also reset", buttons: ["Not now", "Yes, I am sure"], icon: "warning" }).then((value) => {
+        if (value) {
+          this.reset();
+        } else return;
+      });
+    });
   }
 
-  _loadMap() {
-    const coords = [51.4412081, -0.2766986];
+  _loadMap(position) {
+    const { latitude, longitude } = position.coords;
+
+    const coords = [latitude, longitude];
     this.#map = L.map("map").setView(coords, 15);
 
     L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
@@ -181,9 +162,6 @@ class App {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles style by <a href="https://www.hotosm.org/" target="_blank">Humanitarian OpenStreetMap Team</a> hosted by <a href="https://openstreetmap.fr/" target="_blank">OpenStreetMap France</a>',
     }).addTo(this.#map);
-
-    // === WELCOME SIGN ===
-    // L.marker(coords).addTo(map).bindPopup("Welcome to <strong>Richmond Park</strong>").openPopup();
 
     this.#map.on("click", this._showForm.bind(this));
 
@@ -240,10 +218,12 @@ class App {
 
     const [inputTimeIn, inputTimeOut, inputActivity, inputSteps, inputPlaying, inputBathroom, inputRemarks] = allFormInput;
 
-    if (+inputTimeIn.value.split(":")[0] > +inputTimeOut.value.split(":")[0]) return alert("time out is earlier than time in (HOUR)"); //checking by HOUR
-    if (+inputTimeIn.value.split(":")[1] > +inputTimeOut.value.split(":")[1]) return alert("time out is earlier than time in (MINS)"); //checking by MINS
+    if (+inputTimeIn.value.split(":")[0] > +inputTimeOut.value.split(":")[0])
+      return swal({ title: "Warning!", text: "Time Out is earlier than Time In (HOUR)", icon: "warning", button: "Got it!" }); //checking by HOUR
+    else if (+inputTimeIn.value.split(":")[1] > +inputTimeOut.value.split(":")[1])
+      return swal({ title: "Warning!", text: "Time Out is earlier than Time In (MINS)", icon: "warning", button: "Got it!" }); //checking by MINS
 
-    if (inputTimeIn.value === inputTimeOut.value) return alert("make sure time in and time out are not the same");
+    if (inputTimeIn.value === inputTimeOut.value) return swal({ title: "Warning!", text: "Make sure Time In and Time Out are not the same", icon: "warning", button: "Got it!" });
 
     const timein = inputTimeIn.value;
     const timeout = inputTimeOut.value;
@@ -257,27 +237,27 @@ class App {
     } else remarks = inputRemarks.value;
 
     if (activity === "walking") {
-      if (inputSteps.value === "") return alert("Fill in Steps Field");
+      if (inputSteps.value === "") return swal({ title: "Fill-in Steps Field", icon: "warning", button: "Got it!" });
       const steps = +inputSteps.value;
-      if (!(steps >= 0)) return alert("Input must be positive number");
+      if (!(steps >= 0)) return swal({ title: "Input must be a positive number", icon: "warning", button: "Got it!" });
       activityEntry = new WalkingRunning([lat, lng], remarks, timein, timeout, steps, activity);
     }
 
     if (activity === "running") {
-      if (inputSteps.value === "") return alert("Fill in Steps Field");
+      if (inputSteps.value === "") return swal({ title: "Fill-in Steps Field", icon: "warning", button: "Got it!" });
       const steps = +inputSteps.value;
-      if (!(steps >= 0)) return alert("Input must be positive number");
+      if (!(steps >= 0)) return swal({ title: "Input must be a positive number", icon: "warning", button: "Got it!" });
       activityEntry = new WalkingRunning([lat, lng], remarks, timein, timeout, steps, activity);
     }
 
     if (activity === "playing") {
-      if (inputPlaying.value === "") return alert("Fill in Playing Field");
+      if (inputPlaying.value === "") return swal({ title: "Fill-in Playing Field", icon: "warning", button: "Got it!" });
       const playingActivityValue = inputPlaying.value;
       activityEntry = new Playing([lat, lng], remarks, timein, timeout, playingActivityValue, activity);
     }
 
     if (activity === "bathroom") {
-      if (inputBathroom.value === "") return alert("Fill in Bathroom Field");
+      if (inputBathroom.value === "") return swal({ title: "Fill-in Bathroom Field", icon: "warning", button: "Got it!" });
       const bathroomActivityValue = inputBathroom.value;
       activityEntry = new Bathroom([lat, lng], remarks, timein, timeout, bathroomActivityValue, activity);
     }
@@ -410,8 +390,31 @@ class App {
   }
 
   reset() {
-    localStorage.removeItem("activity");
-    location.reload();
+    swal({ title: "Are you sure you want to reset your list?", buttons: ["Not now", "Yes, I am sure"], icon: "warning" }).then((value) => {
+      if (value) {
+        localStorage.removeItem("activity");
+        location.reload();
+      } else return;
+    });
+  }
+
+  _removeAndCreateMap() {
+    mapContainer.remove();
+
+    mapContainer = document.createElement("div");
+    mapContainer.setAttribute("id", "map");
+    mapContainer.setAttribute("class", "map-container");
+    container.insertAdjacentElement("beforeend", mapContainer);
+  }
+
+  _loadCurrentLoc() {
+    this._removeAndCreateMap();
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(this._loadMap.bind(this), () => {
+        alert("Having trouble getting your location");
+      });
+    }
   }
 }
 

@@ -5,6 +5,10 @@
   grid-template-rows: repeat(3, min-content);
   gap: 1rem;
 
+  @media only screen and (max-width: $bp-laptop-small) {
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  }
+
   @media only screen and (max-width: $bp-tablet) {
     height: max-content;
   }
@@ -32,7 +36,7 @@
     }
 
     &--cadence {
-      grid-column: 2/-1;
+      // grid-column: 2/-1;
     }
   }
 }

@@ -21,6 +21,9 @@
       display: block;
       font-size: $fs-caption;
       font-weight: $fw-regular;
+      @media only screen and (max-width: $bp-tablet) {
+        display: inline-block;
+      }
     }
   }
 }
@@ -35,8 +38,8 @@
 
   @media only screen and (max-width: $bp-tablet) {
     display: grid;
-    // grid-template-rows: repeat(2, 1fr);
     grid-template-columns: repeat(auto-fill, minmax(23.4rem, 1fr));
+    height: auto;
   }
 
   .form {
@@ -46,6 +49,9 @@
 
   &::-webkit-scrollbar {
     display: none;
+    // @media only screen and (max-width: $bp-tablet) {
+    //   display: block;
+    // }
   }
 }
 
@@ -55,6 +61,7 @@
 
 .btn-container {
   display: flex;
+  width: 100%;
   gap: 2rem;
 }
 
