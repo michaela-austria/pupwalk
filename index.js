@@ -140,7 +140,7 @@ class App {
     trackerActivtiyContainer.addEventListener("click", this._moveToMarker.bind(this));
 
     btnReset.addEventListener("click", () => {
-      return this.#activityEntries.length === 0 ? alert("No Entries") : this.reset();
+      return this.#activityEntries.length === 0 ? swal("No Entries") : this.reset();
     });
     btnChangeLoc.addEventListener("click", () => {
       swal({ title: "Are you sure you want to change your map?", text: "By confirming, your list will also reset", buttons: ["Not now", "Yes, I am sure"], icon: "warning" }).then((value) => {

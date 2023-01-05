@@ -16,6 +16,8 @@
   &__name {
     font-size: $fs-h3;
     font-weight: $fw-bold;
+    display: flex;
+    flex-direction: column;
 
     span {
       display: block;
@@ -61,10 +63,23 @@
 
 .btn-container {
   display: flex;
-  width: 100%;
+  width: 50%;
   gap: 2rem;
 }
 
 .copyright {
   text-align: center;
+}
+
+.logo-and-btns {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+
+  @media only screen and (max-width: $bp-tablet) {
+    flex-direction: row;
+    justify-content: space-between;
+  }
 }
