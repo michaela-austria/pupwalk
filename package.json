@@ -1,0 +1,23 @@
+{
+  "name": "pupwalk",
+  "version": "1.0.0",
+  "description": "A web application for dog owners where they can log their pet's activities while they're on a walk. They can track the route their dog takes, their activities, and how long they stayed at certain locations. The user can have the option to use a map for either Richmond Park or their current location.",
+  "main": "index.js",
+  "scripts": {
+    "start": "live-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michaela-austria/pupwalk.git"
+  },
+  "author": "Michaela Angela Austria",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/michaela-austria/pupwalk/issues"
+  },
+  "homepage": "https://github.com/michaela-austria/pupwalk#readme",
+  "dependencies": {
+    "live-server": "^1.2.2",
+    "sass": "^1.57.1"
+  }
+}
