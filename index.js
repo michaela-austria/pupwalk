@@ -122,7 +122,7 @@ class App {
 
   constructor() {
     this._getLocalStorage();
-    swal({ title: "Welcome to PupWalk!", text: "Choose location for your map", buttons: ["Your Location", "Richmond Park"], icon: "warning" }).then((value) => {
+    swal({ title: "Welcome to PupWalk!", text: "Choose location for your map", buttons: ["Your Location", "Richmond Park"], icon: "info" }).then((value) => {
       if (value) {
         this._loadMap(this.#coordsPark);
         textLocation.textContent = "@ Richmond Park";
@@ -143,11 +143,19 @@ class App {
       return this.#activityEntries.length === 0 ? swal("No Entries") : this.reset();
     });
     btnChangeLoc.addEventListener("click", () => {
-      swal({ title: "Are you sure you want to change your map?", text: "By confirming, your list will also reset", buttons: ["Not now", "Yes, I am sure"], icon: "warning" }).then((value) => {
-        if (value) {
-          this.reset();
-        } else return;
-      });
+      if (this.#activityEntries.length === 0) {
+        swal({ title: "Are you sure you want to change your map?", text: "By confirming, your list will also reset", buttons: ["Not now", "Yes, I am sure"], icon: "warning" }).then((value) => {
+          if (value) {
+            location.reload();
+          } else return;
+        });
+      } else {
+        swal({ title: "Are you sure you want to change your map?", text: "By confirming, your list will also reset", buttons: ["Not now", "Yes, I am sure"], icon: "warning" }).then((value) => {
+          if (value) {
+            this.reset();
+          } else return;
+        });
+      }
     });
   }
 
@@ -398,17 +406,17 @@ class App {
     });
   }
 
-  _removeAndCreateMap() {
-    mapContainer.remove();
+  // _removeAndCreateMap() {
+  //   mapContainer.remove();
 
-    mapContainer = document.createElement("div");
-    mapContainer.setAttribute("id", "map");
-    mapContainer.setAttribute("class", "map-container");
-    container.insertAdjacentElement("beforeend", mapContainer);
-  }
+  //   mapContainer = document.createElement("div");
+  //   mapContainer.setAttribute("id", "map");
+  //   mapContainer.setAttribute("class", "map-container");
+  //   container.insertAdjacentElement("beforeend", mapContainer);
+  // }
 
   _loadCurrentLoc() {
-    this._removeAndCreateMap();
+    // this._removeAndCreateMap();
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(this._loadMap.bind(this), () => {
