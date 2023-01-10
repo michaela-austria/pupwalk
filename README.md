@@ -21,12 +21,12 @@ A web application for dog owners where they can log their pet's activities while
 
 ## Flowchart
 
-![Flowchart](./flowchart.png)
+![Flowchart](./flowchart-pupwalk.png)
 
 ## Lessons Learned
 
 This was the first project where I use `ES6 Classes` to structure my code. It does make the project architecture much cleaner and I was able to separate the application logic and the data.
-![Proj Architecture](./projarchitecture.png)
+![Proj Architecture](./projectarchitecture-pupwalk.png)
 
 ###
 
