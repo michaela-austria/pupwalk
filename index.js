@@ -420,7 +420,19 @@ class App {
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(this._loadMap.bind(this), () => {
-        alert("Having trouble getting your location");
+        // alert("Having trouble getting your location");
+        swal({ title: "Having trouble getting your location", text: "Make sure you allow the browser to access your location.", buttons: ["Use Richmond Park", "Reload"], icon: "error" }).then(
+          (value) => {
+            if (value) {
+              location.reload();
+            } else {
+              this._loadMap(this.#coordsPark);
+              textLocation.textContent = "@ Richmond Park";
+              btnChangeLoc.classList.remove("hidden");
+              btnReset.classList.remove("hidden");
+            }
+          }
+        );
       });
     }
   }
